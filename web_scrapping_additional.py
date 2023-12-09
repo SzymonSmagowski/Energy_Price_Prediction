@@ -43,7 +43,7 @@ def Start_additional_data_scraping(nowa_nazwa_pliku = 'dane_kse.csv'):
         driver = webdriver.Edge(options=edge_options)
         driver.get(url)
 
-        time.sleep(10)
+        time.sleep(20)
 
         # csv_link = driver.find_element(By.CSS_SELECTOR, 'a[title="CSV"]')
         csv_link = WebDriverWait(driver, 10).until(

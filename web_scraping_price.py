@@ -28,7 +28,6 @@ def Correct_date_click(driver):
         # nie robimy nic jeśli jest wczorajsza data zaznaczona
         return
     else:
-        # TODO sprawdz czy działa klikanie poprzedniej daty
         previous_date = calendar.find_element(By.XPATH, f"//*[ text() = '{yesterday}' ]")
         previous_date.click()
         # klikamy i czekamy aż załaduje tabelkę na dzień dzisiejszy
