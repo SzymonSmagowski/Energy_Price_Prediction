@@ -20,3 +20,5 @@ To start the app: 'uvicorn main:app --reload' in terminal. Then check docs on 'l
 ## Directories:
 1. data - full dataset plus backup / temp scrapped data files.
 2. results - images of evaluation of backtests / predictions and models evaluations.
+
+Additionally requirements.txt treats about current libraries used for project in case you want to use venv.
