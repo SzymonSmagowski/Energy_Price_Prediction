@@ -82,7 +82,7 @@ def update():
     },
 )
 def predict():
-    if True:
+    if Is_valid_time():
         predictions = {}
         date = datetime.now() + timedelta(days=1)
         date = date.strftime('%Y-%m-%d')
