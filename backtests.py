@@ -84,8 +84,8 @@ def Get_dates(date):
     date = date + ' 00:00:00+00:00'
     end_date = pd.to_datetime(date) + timedelta(hours=23)
     date = pd.to_datetime(date) - timedelta(hours=1)
-    end_date = str(end_date) + '+00:00'
-    date = str(date) + '+00:00'
+    end_date = str(end_date) #+ '+00:00'
+    date = str(date) #+ '+00:00'
     return date, end_date
 
 # does not work ???
@@ -128,51 +128,54 @@ def Test_set_evaluation_save(y_test, predictions, name):
 
 # date = '2023-12-07'
 def Backtest(date_start):
-    output = []
-    date, end_date = Get_dates(date_start)
+    try:
+        output = []
+        date, end_date = Get_dates(date_start)
 
-    df = Read_full_dataset()
-    df = Index_fix(df)
-    df = Normalize(df)
+        df = Read_full_dataset()
+        df = Index_fix(df)
+        df = Normalize(df)
 
-    working_dataset  = df[:date]
-    test_day = df[date:end_date]
+        working_dataset  = df[:date]
+        test_day = df[date:end_date]
 
-    for i in range(48):
-        working_dataset[f"hour-{i+1}"] = working_dataset["da1_price"].shift(periods=i+1)
-    working_dataset = working_dataset.dropna()
-    last_record = working_dataset.iloc[-1]
+        for i in range(48):
+            working_dataset[f"hour-{i+1}"] = working_dataset["da1_price"].shift(periods=i+1)
+        working_dataset = working_dataset.dropna()
+        last_record = working_dataset.iloc[-1]
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        working_dataset.drop(['da1_price'], axis = 1), working_dataset['da1_price'], test_size=0.25, random_state=42)
-    
-    model = Train_model_and_fit(X_train, y_train)
-    model_lstm_preds = tf.squeeze(model.predict(X_test))
-    predictions = model_lstm_preds.numpy()
-    y_test.index = np.arange(len(y_test.index))
+        X_train, X_test, y_train, y_test = train_test_split(
+            working_dataset.drop(['da1_price'], axis = 1), working_dataset['da1_price'], test_size=0.25, random_state=42)
 
-    Test_set_evaluation_save(y_test, predictions, str(str(date_start) + "_test_evaluation"))
+        model = Train_model_and_fit(X_train, y_train)
+        model_lstm_preds = tf.squeeze(model.predict(X_test))
+        predictions = model_lstm_preds.numpy()
+        y_test.index = np.arange(len(y_test.index))
 
-    test_day = Add_cols(test_day)
+        Test_set_evaluation_save(y_test, predictions, str(str(date_start) + "_test_evaluation"))
 
-    test_day.iloc[0] = Shift_first(test_day.iloc[0], last_record)
-    actual_values = test_day['da1_price']
-    test_day.drop(['da1_price'], axis=1, inplace=True)
+        test_day = Add_cols(test_day)
 
-    results = []
-    tmp = model.predict(test_day.iloc[0].to_frame().T)
-    results.append(tmp[0][0])
+        test_day.iloc[0] = Shift_first(test_day.iloc[0], last_record)
+        actual_values = test_day['da1_price']
+        test_day.drop(['da1_price'], axis=1, inplace=True)
 
-    i=1
-    for elem in range(len(test_day)-1):
-        test_day.iloc[i] = Shift_the_rest(test_day.iloc[i], test_day.iloc[i-1], results)
-        tmp = model.predict(test_day.iloc[i].to_frame().T)
+        results = []
+        tmp = model.predict(test_day.iloc[0].to_frame().T)
         results.append(tmp[0][0])
-        i+=1
-    
-    for x in range(24):
-        output.append([f"Godzina {x} actual,predicted: ",str(round(actual_values[x], 2)), str(round(results[x], 2))])
-    
-    Test_set_evaluation_save(actual_values, results, str(str(date_start) + "_day_backtest"))
+
+        i=1
+        for elem in range(len(test_day)-1):
+            test_day.iloc[i] = Shift_the_rest(test_day.iloc[i], test_day.iloc[i-1], results)
+            tmp = model.predict(test_day.iloc[i].to_frame().T)
+            results.append(tmp[0][0])
+            i+=1
+
+        for x in range(24):
+            output.append([f"Godzina {x} actual,predicted: ",str(round(actual_values[x], 2)), str(round(results[x], 2))])
+
+        Test_set_evaluation_save(actual_values, results, str(str(date_start) + "_day_backtest"))
+    except Exception as e:
+        print("Błąd przy backtestingu.")
 
     return output

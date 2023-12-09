@@ -7,6 +7,7 @@ import seaborn as sns
 from time import *
 import os
 from datetime import datetime, timedelta
+import unicodedata
 
 def Read_csvs():
     try:
@@ -17,8 +18,7 @@ def Read_csvs():
     return dane_tge, prices
 
 
-def Delete_files():
-    sciezki = ['data\\dane_kse.csv', 'data\\newest_prices.csv']
+def Delete_files(sciezki = ['data\\dane_kse.csv', 'data\\newest_prices.csv']):
     for plik in sciezki:
         if os.path.isfile(plik) :
             os.unlink(plik)
@@ -79,7 +79,9 @@ def Concat_and_preprocess(dane_tge, prices):
         df_concat["day_of_week"] = df_concat.index.dayofweek
         df_concat["month"] = df_concat.index.month
         df_concat["hour"] = df_concat.index.hour
-        df_concat['Niedyspozycyjnosc'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹ca z ograniczeñ sieciowych wystêpuj¹cych w sieci przesy³owej oraz sieci dystrybucyjnej w zakresie dostarczania energii elektrycznej'].astype(int) + df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].astype(int)
+        df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].apply(lambda x: unicodedata.normalize("NFKD", x))
+        df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].apply(lambda x: x.replace(' ',''))
+        df_concat['Niedyspozycyjnosc'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹ca z ograniczeñ sieciowych wystêpuj¹cych w sieci przesy³owej oraz sieci dystrybucyjnej w zakresie dostarczania energii elektrycznej'].astype(float) + df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].astype(float)
         df_concat.drop(['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹ca z ograniczeñ sieciowych wystêpuj¹cych w sieci przesy³owej oraz sieci dystrybucyjnej w zakresie dostarczania energii elektrycznej','Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'], inplace=True, axis=1)
         df_concat['zrodla_odnawialne'] = df_concat['Prognozowana sumaryczna generacja róde³ wiatrowych'].astype(int) + df_concat['Prognozowana sumaryczna generacja róde³ fotowoltaicznych'].astype(int)
         df_concat.drop(['Prognozowana sumaryczna generacja róde³ wiatrowych','Prognozowana sumaryczna generacja róde³ fotowoltaicznych'], inplace=True, axis=1)

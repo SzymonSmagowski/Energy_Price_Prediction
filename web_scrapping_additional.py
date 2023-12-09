@@ -27,7 +27,7 @@ def change_latest_filename(directory, new_name):
     return
 
 
-def Start_additional_data_scraping():
+def Start_additional_data_scraping(nowa_nazwa_pliku = 'dane_kse.csv'):
     try:
 
         webdriver_path = 'edge_driver\\msedgedriver.exe'
@@ -55,5 +55,5 @@ def Start_additional_data_scraping():
     except Exception as e:
         print("Wystąpił błąd podczas scrapowania dodatkowych danych:", str(e))
 
-    change_latest_filename(download_path, 'dane_kse.csv')
+    change_latest_filename(download_path, nowa_nazwa_pliku)
     return
