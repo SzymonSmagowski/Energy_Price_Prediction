@@ -10,12 +10,13 @@ To start the app: 'uvicorn main:app --reload' in terminal. Then check docs on 'l
 
 ## Files (.py):
 1. main.py - center of the application. API anchor.
-2. web_scraping_price and additional - uses selenium to open browser and download both used datasets to files. (above and prices here: https://tge.pl/energia-elektryczna-rdn)
-3. concat_to_dataset - uses scrapped data and joins it with full dataset. It's like an actualisation to the dataset. Deletes files.
+2. web_scraping_price_monthly and additional_monthly - uses selenium to open browser and download both used datasets to files. (above and prices here: https://tge.pl/energia-elektryczna-rdn)
+3. concat_to_dataset - uses scrapped data and joins it with full dataset. It's like an update to the dataset up to a month behind from now. Deletes files.
 4. backtests - creates new model and backtests it for given dates. 
 5. prediction - webscraps additional data, creates new model and predict tomorrow's prices of energy.
 6. prices_scraping_history - helper to scrap many prices datasets in the same run.
 7. unittests - basic instance of unit testing. Not finished becuase many functions here works on dataframes themselves and returns them.
+8. web_scraping_price and additional - old version files, but still used in one place in /predict. After some modification will be deleted.
 
 ## Directories:
 1. data - full dataset plus backup / temp scrapped data files.
