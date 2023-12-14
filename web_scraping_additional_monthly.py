@@ -107,6 +107,7 @@ def Start_additional_data_scraping(nowa_nazwa_pliku = 'dane_kse.csv'):
 
         Change_filter_and_download(driver)
         Change_latest_filename(download_path, nowa_nazwa_pliku)
+        driver.quit()
     except Exception as e:
         print("Wystąpił błąd podczas scrapowania dodatkowych danych:", str(e))
 

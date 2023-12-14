@@ -79,8 +79,8 @@ def Concat_and_preprocess(dane_tge, prices):
         df_concat["day_of_week"] = df_concat.index.dayofweek
         df_concat["month"] = df_concat.index.month
         df_concat["hour"] = df_concat.index.hour
-        df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].apply(lambda x: unicodedata.normalize("NFKD", x))
-        df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].apply(lambda x: x.replace(' ',''))
+        df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].apply(lambda x: unicodedata.normalize("NFKD", str(x)))
+        df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].apply(lambda x: str(x).replace(' ',''))
         df_concat['Niedyspozycyjnosc'] = df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹ca z ograniczeñ sieciowych wystêpuj¹cych w sieci przesy³owej oraz sieci dystrybucyjnej w zakresie dostarczania energii elektrycznej'].astype(float) + df_concat['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'].astype(float)
         df_concat.drop(['Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹ca z ograniczeñ sieciowych wystêpuj¹cych w sieci przesy³owej oraz sieci dystrybucyjnej w zakresie dostarczania energii elektrycznej','Prognozowana wielkoæ niedyspozycyjnoci wynikaj¹cych z warunków eksploatacyjnych JW wiadcz¹cych us³ugi bilansuj¹ce w ramach RB'], inplace=True, axis=1)
         df_concat['zrodla_odnawialne'] = df_concat['Prognozowana sumaryczna generacja róde³ wiatrowych'].astype(int) + df_concat['Prognozowana sumaryczna generacja róde³ fotowoltaicznych'].astype(int)
@@ -115,6 +115,12 @@ def Concat_to_dataset():
     df_concat = Concat_and_preprocess(dane_kse, prices)
     try:
         full_dataset = pd.concat([Read_full_dataset(), df_concat])
+        full_dataset = full_dataset.reset_index()
+        full_dataset['Time'] = full_dataset['Time'].astype(str)
+        full_dataset = full_dataset.drop_duplicates(subset='Time', keep='first')
+        full_dataset.index = full_dataset['Time']
+        full_dataset.index = pd.to_datetime(full_dataset.index)
+        full_dataset.drop(['Time'], axis = 1, inplace=True)
         full_dataset.to_csv('data\\ready_dataset.csv')
     except Exception as e:
         print("Wystąpił błąd podczas łączenia i zapisu pliku całego zbioru danych: ", str(e))

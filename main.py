@@ -1,9 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Query
 from datetime import datetime, timezone, timedelta
 from typing import List
-import web_scraping_price
-import web_scrapping_additional
-import concat_to_dataset
+import web_scraping_additional_monthly, web_scraping_price_monthly, concat_to_dataset
 import backtests
 import prediction
 from datetime import datetime
@@ -17,7 +15,7 @@ Results are saved in folder /results with format:
 
 
 * **Update dataset** (/update) 
-Updates dataset for current day. That means it has to be done on daily basis before /predict.
+Updates dataset up to one month behind. Do it before /predict.
 * **Predict tomorrow's prices** (/predict)
 Use only between 9.00 and 10.00. Downloads additional data for the next day and returns hourly predictions.
 * **Backtesting** (/?dates=2023-12-07&dates=2023-03-11) - example.
@@ -63,9 +61,10 @@ def Is_valid_time():
     },
 )
 def update():
-    web_scraping_price.Start_price_scraping()
-    web_scrapping_additional.Start_additional_data_scraping()
+    web_scraping_price_monthly.Start_price_scraping()
+    web_scraping_additional_monthly.Start_additional_data_scraping()
     concat_to_dataset.Concat_to_dataset()
+    
 
 # Endpoint /predict
 @app.get('/predict', 
@@ -90,6 +89,7 @@ def predict():
         return predictions
     else:
         raise HTTPException(status_code=403, detail="Prognozy są dostępne tylko od 9:00 do 10:00.")
+    
 
 # Endpoint /backtest
 @app.get('/backtest',
